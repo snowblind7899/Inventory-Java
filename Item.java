@@ -1,3 +1,4 @@
+//item class for item object and attributes
 public class Item {
     private int id;
     private int weight;

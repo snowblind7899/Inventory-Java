@@ -4,6 +4,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
 
+//rendering and logic of the UI
 public class MenuUI extends JFrame implements ActionListener{
     private JLabel IDLabel;
     private JTextField IDField;
@@ -98,7 +99,9 @@ public class MenuUI extends JFrame implements ActionListener{
         setVisible(true);
     }
 
-    //method for handling button clicks, as well as updating the status message accordingly
+    //method for handling button click events
+    //updates status message on the UI
+    //sends command to begin writing to csv file
     public void actionPerformed(ActionEvent e){
         if(e.getSource() == save){
             switch(getInputFields()){
@@ -112,7 +115,11 @@ public class MenuUI extends JFrame implements ActionListener{
                     break;
                 case -3:
                     System.out.println("invalid int input");
-                    status.setText("Invalid input for ID or weight");
+                    status.setText("Invalid input for ID and/or weight");
+                    break;
+                case -4:
+                    System.out.println("string fields empty");
+                    status.setText("Sender/Reciever/Description fields cannot be empty");
                     break;
                 default:
                     try {
@@ -131,6 +138,7 @@ public class MenuUI extends JFrame implements ActionListener{
             status.setText(" ");
         }
 
+        //clear input fields upon pressing either button
         IDField.setText("");
         weightField.setText("");
         senderField.setText("");
@@ -138,6 +146,9 @@ public class MenuUI extends JFrame implements ActionListener{
         descField.setText("");
     }
 
+    //method for getting data from input fields and (potentially) creating an object
+    //refer to saveInventoryEntry in inventoryLogic.java for return values -1 and -2
+    //returns -3 on invalid integer parse (non-integer values or no input)
     private int getInputFields(){
         int id;
         int weight;
@@ -150,8 +161,13 @@ public class MenuUI extends JFrame implements ActionListener{
         }
 
         String senderName = senderField.getText();
-        String recieveString = recieveField.getText();
+        String recieveName = recieveField.getText();
         String description = descField.getText();
-        return logic.saveInventoryEntry(id,weight,senderName,recieveString,description);
+
+        if(senderName.trim().equals("") || recieveName.trim().equals("") || description.trim().equals("")){
+            return -4;
+        }
+
+        return logic.saveInventoryEntry(id,weight,senderName,recieveName,description);
     }
 }

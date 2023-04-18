@@ -1,3 +1,4 @@
+//inventory class to facilitate the storage of multiple items
 public class Inventory {
     private Item[] items;
     private int index;
