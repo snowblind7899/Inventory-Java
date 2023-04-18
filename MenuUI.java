@@ -2,10 +2,9 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
 
 public class MenuUI extends JFrame implements ActionListener{
-    private JButton save;
-    private JButton clear;
     private JLabel IDLabel;
     private JTextField IDField;
     private JLabel weightLabel;
@@ -14,11 +13,18 @@ public class MenuUI extends JFrame implements ActionListener{
     private JTextField senderField;
     private JLabel recieveLabel;
     private JTextField recieveField;
+    private JLabel descLabel;
+    private JTextField descField;
     private JLabel status;
+    private JButton save;
+    private JButton clear;
+    private inventoryLogic logic;
 
+    //initialize the UI upon creating the object, also starts the inventory logic
     public MenuUI(){
+        logic = new inventoryLogic();
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(450, 250);
+        setSize(450, 300);
         setTitle("Inventory");
 
         setLayout(new GridBagLayout());
@@ -62,38 +68,90 @@ public class MenuUI extends JFrame implements ActionListener{
         gbc.gridy = 3;
         add(recieveField,gbc);
 
-        save = new JButton("Save");
+        descLabel = new JLabel("Description: ");
         gbc.gridx = 0;
         gbc.gridy = 4;
+        add(descLabel,gbc);
+        descField = new JTextField(20);
+        gbc.gridx = 1;
+        gbc.gridy = 4;
+        add(descField,gbc);
+
+        save = new JButton("Save");
+        gbc.gridx = 0;
+        gbc.gridy = 5;
         add(save,gbc);
         save.addActionListener(this);
 
         clear = new JButton("Clear");
         gbc.gridx = 1;
-        gbc.gridy = 4;
+        gbc.gridy = 5;
         add(clear,gbc);
         clear.addActionListener(this);
 
         status = new JLabel(" ");
         gbc.gridx = 0;
-        gbc.gridy = 5;
+        gbc.gridy = 6;
         gbc.gridwidth = 2;
         add(status,gbc);
 
         setVisible(true);
     }
 
+    //method for handling button clicks, as well as updating the status message accordingly
     public void actionPerformed(ActionEvent e){
         if(e.getSource() == save){
-            status.setText("Saved");
-            System.out.println("Saved");
+            switch(getInputFields()){
+                case -1:
+                    System.out.println("duplicate id");
+                    status.setText("Item(s) with this ID already exists");
+                    break;
+                case -2:
+                    System.out.println("inventory full");
+                    status.setText("The inventory has already reached capacity");
+                    break;
+                case -3:
+                    System.out.println("invalid int input");
+                    status.setText("Invalid input for ID or weight");
+                    break;
+                default:
+                    try {
+                        logic.saveRecentToCSV();
+                    } catch (IOException e1) {
+                        System.out.println("failed to save to csv");
+                        status.setText("An error occured while saving");
+                        break;
+                    }
+                    System.out.println("successful save");
+                    status.setText("Item saved successfully");
+                    break;
+            }
         } else {
-            status.setText("Cleared");
-            System.out.println("Cleared");
+            System.out.println("cleared");
+            status.setText(" ");
         }
+
         IDField.setText("");
         weightField.setText("");
         senderField.setText("");
         recieveField.setText("");
+        descField.setText("");
+    }
+
+    private int getInputFields(){
+        int id;
+        int weight;
+        
+        try {
+            id = Integer.parseInt(IDField.getText());
+            weight = Integer.parseInt(weightField.getText());
+        } catch (NumberFormatException num) {
+            return -3;
+        }
+
+        String senderName = senderField.getText();
+        String recieveString = recieveField.getText();
+        String description = descField.getText();
+        return logic.saveInventoryEntry(id,weight,senderName,recieveString,description);
     }
 }

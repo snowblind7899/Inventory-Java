@@ -1,33 +1,40 @@
 public class Inventory {
     private Item[] items;
     private int index;
+    private final int MAX_INVENTORY_ITEMS = 20;
 
     public Inventory(){
-        items = new Item[20];
+        items = new Item[MAX_INVENTORY_ITEMS];
         index = 0;
     }
 
-    /* Add an item to the inventory array
-     * returns: 
-     * 0 on success
-     * -1 on duplicate ID
-     * -2 on out of space
-     */
+    // Add an item to the inventory array
+    // 0 for succesful add, -1 for out of space
     public int addItem(Item item){
-        if(index > 0){
-            for(int i = 0; i < index;i++){
-                if(items[i].getId() == item.getId()){
-                    return -1;
-                }
-            }
-        }
-
-        if(index < 20){
+        if(index < MAX_INVENTORY_ITEMS){
             items[index] = item;
             index++;
             return 0;
         }
-        
-        return -2;
-    }   
+        return -1;
+    }
+    
+    //checks for duplicate id
+    //-1 for duplicate spotted
+    //0 for no duplicate spotted
+    public int checkID(int ID){
+        if(index > 0){
+            for(int i = 0; i < index;i++){
+                if(items[i].getId() == ID){
+                    return -1;
+                }
+            }
+        }
+        return 0;
+    }
+
+    //returns most recent item
+    public Item getRecentItem(){
+        return items[index-1];
+    }
 }
